@@ -1,0 +1,555 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta http-equiv="refresh" content="10" > -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300|Open+Sans+Condensed:300" rel="stylesheet">
+    <script src="weather.js"></script>
+    <script src="lastTimeWatering.js"></script>
+    <title>AGS - Connected Plants and Gardens</title>
+
+</head>
+
+<body onload="startOnLoad()">
+    <div class="container">
+        <div class="wrapper">
+            <div class="deco">
+                <div class="part1"></div>
+                <div class="part2"></div>
+                <div class="part3"></div>
+                <div class="part4"></div>
+                <div class="part5"></div>
+            </div>
+            <div class="title">
+                <h1>Cloud Gardens</h1>
+                <h3 id="currentIP">...</h2>
+            </div>
+            <div class="panel top">
+                <div class="moitruong">
+                    <div class="left w-info">
+                        <span id="city-weather">Hà Nội</span>
+                        <span id="desc-weather">-</span>
+                        <span id="update-weather">-</span>
+                    </div>
+                    <div class="right w-icon">
+                            <img id="icon-weather" src="" width="80px" height="80px" />
+                        </div>
+                    <div class="clear" style="margin-bottom: 10px"></div>
+                    <div class="left">
+                        <span class="smallLbl">Nhiệt độ ngoài trời</span>
+                        <span id="nhietdo" class="lbl-w-online">...</span>
+                    </div>
+                    <div class="right">
+                        <span class="smallLbl">Độ ẩm không khí</span>
+                        <span id="doam" class="lbl-w-online">...</span>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="plantInfo bg">
+                <span class="smallLbl" id="lastWatering">...</span>
+            </div>
+            <div class="control bg">
+                <button class="btn btn-left left" id="btn-bom" onclick="bomControl()">Bắt đầu tưới</button>
+                <button class="btn btn-right left" id="btn-hengio-bom" onclick="hienThiHenGio()">&nbsp;</button>
+                <div class="clear"></div>
+            </div>
+            <div class="panel bg bottom">
+                <div class="hengio dongTab" id="hengiochung-panel">
+                    <span id="title-hengio">Lịch tưới tự động hiện tại</span>
+                    <!-- <span onclick="anHenGio()" class="right btn-an smallLbl">Ẩn hẹn giờ</span> -->
+                    <div class="clear"></div>
+                    <div class="hengiobom" id="hengiobom-panel">
+                        <ol id="list-hengio">
+                        </ol>
+                        <button onclick="dongMoPanelThemHenGio('mo')" id="btn-themmoi" class="btn them-hengio color4 left">Thêm mới</button>
+                        <button onclick="huyTatCaHenGioTuoi()" id="btn-huytat" class="btn them-hengio color5 right">Hủy tất</button>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="hengiobom dongTab" id="themgiobom-panel">
+                        <ol id="list-themhengio">
+                            <li>Bắt đầu tưới lúc: <select class="right combo" id="combo-hengio-start"></select></li>
+                            <li></li>
+                            <li>Ngưng tưới sau: <select class="right combo" id="combo-hengio-dura"></select></li>
+                            <li></li>
+                        </ol>
+                        <button onclick="themHenGioTuoiMoi()" id="button-them-hengio-ok" class="btn them-hengio color4 left">OK - Thêm</button>
+                        <button onclick="dongMoPanelThemHenGio('dong')" class="btn them-hengio color5 right">Hủy</button>
+                        <div class="clear"></div>
+                    </div>                   
+                </div>
+            </div>
+            <div class="push"></div>
+        </div>
+        <div class="deco footer">
+            <div class="part1"></div>
+            <div class="part2"></div>
+            <div class="part3"></div>
+            <div class="part4"></div>
+            <div class="part5"></div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 40%;
+            margin: auto;
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .wrapper {
+            width: 100%;
+            min-height: 100%;
+            margin-bottom: -15px;
+            background: #fafafa;
+        }
+        .deco { width: 100%; }
+        .deco div, .footer div { 
+            width: 20%;
+            height: 5px;
+            float: left;
+        }
+        .footer, .footer div, .push { height: 15px; }
+        .deco .part1 { background-color: #2e712a; }
+        .deco .part2 { background-color: #00ab6b; }
+        .deco .part3 { background-color: #00c9a7; }
+        .deco .part4 { background-color: #39f077; }
+        .deco .part5 { background-color: #d5fe77; }
+        .btn {
+            height: 50px;
+            line-height: 50px;
+            background: white;
+            box-sizing: border-box;
+            border: 1px solid #19c022;
+            border-radius: 25px;
+            -webkit-border-radius: 25px;
+            text-align: center;
+            outline-width: 0px;
+            font-size: 0.9rem;
+            color: #555555;
+        }
+        .combo {
+            width: 45%;
+            height: 30px;
+            padding: 0px 5px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .combo:focus {
+            border-color: #66ccff;
+            outline: 0;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+
+        .panel {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .hengio {
+            margin: 0 5%;
+        }
+        #title-hengio {
+            padding: 0.6em 1rem 0.4em;
+            font-size: 0.9rem;
+            font-weight: bold;
+            height: 20px;
+            line-height: 20px;
+            display: block;
+            color: #333333;
+        }
+        .huy-hengio, .them-hengio, .huytat-hengio {
+            height: 30px;
+            line-height: 30px;
+            min-width: 30px;
+            border-radius: 15px;
+            -webkit-border-radius:15px;
+            font-size: 0.8rem;
+            font-weight: 600;    
+            color: #fff;
+        }
+        .them-hengio, .huytat-hengio {
+            width: 47%;
+            margin-top:2em;
+            font-weight: 300;
+        }
+        .color4 {
+            background-color: #19c022;
+            border-color: #19c022;
+            color:#fff;
+        }
+        .color5 {
+            background-color: #2e712a;
+            border-color: #2e712a;
+        }   
+    
+        .control { width: 100%; }
+        span.smallLbl { font-size: 0.8rem; }
+    
+        .btn-left { 
+            margin-left:5%;
+            -webkit-border-radius: 25px 0 0 25px;
+            border-radius: 25px 0 0 25px;
+            width: 65%;
+        }
+        .btn-right {
+            border-radius: 0 25px 25px 0;
+            -webkit-border-radius: 0 25px 25px 0;
+            border-left: none;
+            width: 25%;
+            background-image: url("/images/cal.png");
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        .btn:disabled {
+            background: #ede9e9;
+            border-color: #ede9e9;
+        }
+
+        .plantInfo {
+            width: 80%;
+            padding: 10px 10% 0;
+        }
+        .moitruong .lbl-w-online {
+            margin-top:-5px;
+            font-size: 36px;
+            color: #19c022;
+        }
+        .moitruong #update-weather {
+            font-size:12px;
+            color:#555;
+        }
+        .moitruong #desc-weather {
+            font-size:0.9rem;
+            margin-bottom: 1px;
+        }
+        .moitruong #desc-weather::first-letter {
+            text-transform: uppercase;
+        }
+        .moitruong #city-weather {
+            font-weight: bold;
+            margin: 5px 0 3px;
+            font-size: 1.1rem;
+        }
+        .moitruong span { display: block; }
+        .moitruong .left {
+            padding-left:10%;
+            width:40%;
+        }
+        .moitruong .right {
+            padding-right: 10%;
+            width: 40%;
+            text-align: right;
+        }
+        .moitruong .w-info { width: 50%;  }
+        .moitruong .w-icon { width: 30%;  }
+        .moitruong         { width: 100%; }
+        .bg {
+            background-color: #fff;
+            padding-top: 15px;
+        }
+        .title {
+            font-family: 'Open Sans Condensed', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 15px 0;
+            color: #19c022;
+        }
+        
+        ol li {
+            display: block;
+            margin:0;
+            padding:0.5em 1rem;
+            height: 30px;
+            line-height: 35px;
+            font-size: 0.8rem;
+        }
+        ol > li:nth-child(odd) {  }
+        ol > li:nth-child(even) {
+             height: 1px; 
+             line-height: 1px; 
+             margin: 0 5% 0 12%; 
+             padding:0; 
+             border-bottom: solid 1px #eee; }
+        
+        body { font-family: 'Nunito Sans', sans-serif; }
+        .left { float: left; }     
+        .right { float: right; }
+        .clear { clear: both; }
+        .dongTab { display: none; }
+        @media only screen and (min-width: 1200px) {
+            .container {
+                width: 30%;
+            }
+        }
+
+        @media only screen and (max-width: 768px) and (min-width:600px) {
+            .container {
+                width: 60%;
+            }
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+            }
+
+            .combo {
+                padding: 0px 1px;
+            }
+        }
+
+        @media only screen and (max-width: 375px) {
+            .container {
+                width: 100%;
+            }
+
+            .combo {
+                padding: 0px 1px;
+                font-size: 13px;
+            }
+        }
+    </style>
+    <script id="newest-script">
+        function dongMoPanelThemHenGio(arg) {
+            if (arg == "dong") { //dong danh sach hen gio, mo them hen gio
+                document.getElementById("themgiobom-panel").classList.add("dongTab");
+                document.getElementById("hengiobom-panel").classList.remove("dongTab");
+                document.getElementById("title-hengio").innerHTML = "Lịch tưới tự động hiện tại ("+lichTuoi.length+"/5)";
+                hienThiLichTuoi(); 
+            } else { //mo danh sach hen gio, dong them hen gio (gia tri default)
+                document.getElementById("hengiobom-panel").classList.add("dongTab");
+                document.getElementById("themgiobom-panel").classList.remove("dongTab");
+                document.getElementById("title-hengio").innerHTML = "Thêm 1 lịch tưới tự động";
+                document.getElementById("combo-hengio-start").selectedIndex = 0;
+                document.getElementById("combo-hengio-dura").selectedIndex = 0;
+            }
+        }
+        function loadThoiGianChoComboBox() {
+            var h = 5; // chi bat dau tuoi tu 5h sang
+            var m = 0;
+            var comboStart = document.getElementById("combo-hengio-start");
+            
+            //them placeholder cho combobox
+            var op = document.createElement("option");
+            op.value= 0;
+            op.text = "Chọn giờ tưới";
+            op.disabled = true;
+            comboStart.add(op);
+            
+            for (var h = 0; h < 24; h++) { //khong tuoi sau 21h
+                for (var i = 0; i <=11 ; i++) {
+                    m = i*5;
+                    minutes = (m<10) ? "0"+m.toString() : m.toString();
+                    hours = (h > 12) ? h-12 : h;
+                    hours = (h<10) ? "0"+hours.toString() : hours.toString();
+                    ampm = h >= 12 ? 'PM' : 'AM';
+                    var op = document.createElement("option");
+                    op.text = hours+":"+minutes+" "+ampm;
+                    op.value = (h*60+m)*60; //startTime in seconds from 0h00m00s;
+                    comboStart.add(op);
+                }
+            }
+            var itemsText = ["15 giây","30 giây","45 giây","1 phút","2 phút","5 phút","10 phút","15 phút","30 phút"];
+            var itemsValue = [15,30,45,60,120,300,600,900,1800]; //duration in seconds;
+            var comboDura = document.getElementById("combo-hengio-dura");
+            for (var i = 0; i < itemsValue.length;i++) {
+                var op = document.createElement("option");
+                op.text = itemsText[i];
+                op.value = itemsValue[i];
+                comboDura.add(op);
+            }
+        }
+        function themHenGioTuoiMoi() {
+            //luu lich tuoi hien tai
+            var lastLichTuoi = lichTuoi.toString();
+            var lastTuoiDuration = tuoiDuration.toString();
+
+            var gioBatDauTuoi = parseInt(document.getElementById("combo-hengio-start").value); //unit of gioTuoi: seconds
+            
+            if (gioBatDauTuoi == 0) {
+                alert("[Chưa đủ thông tin] - Vui lòng chọn thời điểm bắt đầu tưới !");
+                return false;
+            } else {
+                var dura = parseInt(document.getElementById("combo-hengio-dura").value); //unit of dura: seconds;
+                
+                if (lichTuoi.length > 0 ) {
+                    console.log(lichTuoi.length);
+                    var on  = lichTuoi;
+                    var off = on.map(function (num,idx) { return num+tuoiDuration[idx]});
+                    console.log("on="+on,"off="+off);
+                    var gioNgungTuoi = gioBatDauTuoi+dura;
+                    console.log("gBD="+gioBatDauTuoi,"gKT="+gioNgungTuoi);
+                    for (var i=0; i < on.length;i++) {
+                        if (((gioBatDauTuoi >= on[i])&&(gioBatDauTuoi <= off[i]))||((gioNgungTuoi >= on[i])&&(gioNgungTuoi <= off[i]))) {
+                            console.log("Error Trung or Goi lich.","i="+i,"on[i]="+on[i],"off[i]="+off[i]);
+                            alert("[Trùng thông tin] - Khoảng thời gian bạn chọn trùng hoặc gối lên 1 lịch hẹn tưới đã có. Vui lòng chọn thời điểm khác, hoặc hủy lịch hẹn đã có.");
+                            return false;
+                        }                       
+                    }
+                }
+                lichTuoi.push(gioBatDauTuoi);
+                lichTuoi.sort((a, b) => a - b);
+                var valueIndex = lichTuoi.indexOf(gioBatDauTuoi);
+                tuoiDuration.splice(valueIndex,0,dura); 
+                
+                //luu lich tuoi moi
+                newLichTuoi = lichTuoi.toString();
+                newTuoiDuration = tuoiDuration.toString();
+                saveLichTuoi(lastLichTuoi,lastTuoiDuration,newLichTuoi,newTuoiDuration);
+            }
+            //dong&mo panel tuong ung, hien thi lich tuoi moi
+            dongMoPanelThemHenGio("dong");
+        }
+        function huyHenGioTuoi() {
+            //luu lich tuoi hien tai
+            var lastLichTuoi = lichTuoi.toString();
+            var lastTuoiDuration = tuoiDuration.toString();
+
+            var target = event.target;
+            var id = target.id;
+            //get id from target (btn-huy-hengio-so-id)
+            var valueIndex = id.charAt(id.length-1);
+            //remove lich tuoi from variable
+            lichTuoi.splice(valueIndex,1);
+            tuoiDuration.splice(valueIndex,1);
+            
+            //luu lich tuoi moi
+            newLichTuoi = lichTuoi.toString();
+            newTuoiDuration = tuoiDuration.toString();
+            saveLichTuoi(lastLichTuoi,lastTuoiDuration,newLichTuoi,newTuoiDuration);
+            
+            //hien thi lich tuoi
+            hienThiLichTuoi();
+            document.getElementById("title-hengio").innerHTML = "Lịch tưới tự động hiện tại ("+lichTuoi.length+"/5)";
+        }
+        function huyTatCaHenGioTuoi() {
+            //luu lich tuoi hien tai
+            var lastLichTuoi = lichTuoi.toString();
+            var lastTuoiDuration = tuoiDuration.toString();
+            
+            lichTuoi = [];
+            tuoiDuration = [];
+            
+            //luu lich tuoi moi
+            newLichTuoi = "";
+            newTuoiDuration = newLichTuoi;
+            saveLichTuoi(lastLichTuoi,lastTuoiDuration,newLichTuoi,newTuoiDuration);
+            
+            //hien thi lich tuoi
+            hienThiLichTuoi();
+            document.getElementById("title-hengio").innerHTML = "Lịch tưới tự động hiện tại ("+lichTuoi.length+"/5)";
+        }
+        
+        function saveLichTuoi(lastLichTuoi,lastTuoiDuration,newLichTuoi,newTuoiDuration) {
+            //them gia tri = 0 cho cac slot lich tuoi con thieu
+            if (newLichTuoi != "") { // newLichTuoi co 1-5 gia tri
+                var arrayLen = 5-lichTuoi.length;
+                for (var j=0; j < arrayLen; j++) {
+                    newLichTuoi+=",0";
+                    newTuoiDuration+=",0";
+                }
+            } else {
+                newLichTuoi = "0,0,0,0,0";
+                newTuoiDuration = newLichTuoi;
+            }
+                
+            var strLichTuoiDuration = (newLichTuoi+","+newTuoiDuration).trim();
+                        
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    //lay phan hoi tu server
+                    if (this.responseText == "0") {
+                        alert("Save failed");
+                        lichTuoi = lastLichTuoi.split(',').map(Number);
+                        tuoiDuration = lastTuoiDuration.split(',').map(Number);
+                    } else {
+                        console.log("Save thanh cong");
+                    }
+                    //disable btn Them moi neu co da 5 lich hen tuoi.
+                    document.getElementById("btn-themmoi").disabled = (lichTuoi.length == 5) ? true : false;
+                }
+            }
+            xhttp.open("GET", "saveLichTuoi?strLichTuoi="+strLichTuoiDuration, true);
+            xhttp.send();    
+        }
+        function hienThiHenGio() {
+            var btnStatus = document.getElementById("btn-hengio-bom").classList.contains("color4");
+            if (btnStatus) {
+                document.getElementById("hengiochung-panel").classList.add("dongTab");
+                document.getElementById("btn-hengio-bom").classList.remove("color4");
+            } else {
+                hienThiLichTuoi();
+                document.getElementById("hengiochung-panel").classList.remove("dongTab");
+                document.getElementById("btn-hengio-bom").classList.add("color4");
+            }
+        }
+    </script>
+    <script>
+
+        function bomCheck() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var btn = document.getElementById("btn-bom");
+                    var btnStatus = (btn.classList.contains("color4")) ? 1 : 0;
+                    // this.responseText = 1: Bom dang bat, = 0: Bom dang tat
+                    if (btnStatus != parseInt(this.responseText)) { 
+                        //chi thuc hien khi status cua bom voi status cua button khac nhau
+                        if (parseInt(this.responseText) == 1) {
+                            btn.innerHTML = "Ngưng tưới nước";
+                            btn.classList.add("color4");
+                        } else {
+                            btn.innerHTML = "Bắt đầu tưới";
+                            btn.classList.remove("color4");
+                        }
+                        //thay doi thong tin lan tuoi cuoi
+                        getLastTimeWatering();
+                    }
+                }
+            }
+            xhttp.open("GET", "bomCheckStatus", true);
+            xhttp.send();
+        }    
+        function bomControl() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var btn = document.getElementById("btn-bom");
+                    if (parseInt(this.responseText) == 0) {
+                        btn.innerHTML = "Bắt đầu tưới";
+                        btn.classList.remove("color4");
+                    } else {
+                        btn.innerHTML = "Ngưng tưới nước";
+                        btn.classList.add("color4");
+                        //save the last watering
+                        saveLastTimeWatering();
+                    }
+                }
+            }
+            xhttp.open("GET", "bom", true);
+            xhttp.send();
+        }
+
+        setInterval(function () {
+            bomCheck();
+        }, 5*1000);
+    </script>
+
+</body>
+</html>
